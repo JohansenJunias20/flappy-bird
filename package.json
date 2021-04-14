@@ -1,0 +1,22 @@
+{
+  "name": "latihan",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/JohansenJunias20/flappy-bird.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/JohansenJunias20/flappy-bird/issues"
+  },
+  "homepage": "https://github.com/JohansenJunias20/flappy-bird#readme",
+  "dependencies": {
+    "phaser": "^3.54.0"
+  }
+}
