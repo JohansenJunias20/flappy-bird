@@ -32,7 +32,19 @@ function preload() {
     baseTexture = this.load.image('base', 'assets/base.png');
     this.load.image('pipe', 'assets/pipe-green.png');
     this.load.image('bg', 'assets/background-day.png');
-    this.load.image("ready",'assets/message.png');
+    this.load.image("ready", 'assets/message.png');
+
+
+    this.load.image('number0', 'assets/0.png')
+    this.load.image('number1', 'assets/1.png')
+    this.load.image('number2', 'assets/2.png')
+    this.load.image('number3', 'assets/3.png')
+    this.load.image('number4', 'assets/4.png')
+    this.load.image('number5', 'assets/5.png')
+    this.load.image('number6', 'assets/6.png')
+    this.load.image('number7', 'assets/7.png')
+    this.load.image('number8', 'assets/8.png')
+    this.load.image('number9', 'assets/9.png')
 
 }
 var baseTexture;
@@ -44,8 +56,11 @@ var startOnce = false;
 const distanceBetweenPipes = 200
 const distanceBetweenTopAndBottom = 140
 const velocityPipes = -75
-const jumpBirdVelocity = -300
+const jumpBirdVelocity = -300;
+var scores = 0;
 var readyMsg;
+var cetakScore = false;
+var scoreSprite = []
 function create() {
     const ref = this;
     // menambah sprite pada canvas dengan physics
@@ -74,7 +89,7 @@ function create() {
     bird.body.width = bird.width / 1.5
     bird.body.offset.x = (bird.width - bird.body.width) / 2
     bird.body.allowGravity = false
-    
+
     base.setPosition(base.width / 2, this.cameras.main.height - base.height / 2)
     base.setImmovable(true)
     base.body.allowGravity = false
@@ -82,14 +97,24 @@ function create() {
 
     this.physics.add.collider(bird, base)
     cursors = this.input.keyboard.createCursorKeys();
-    var temp = this.add.sprite(this.cameras.main.width/2,this.cameras.main.height/2,'bg');
+    var temp = this.add.sprite(this.cameras.main.width / 2, this.cameras.main.height / 2, 'bg');
     console.log(this)
     temp.displayWidth = this.cameras.main.width
     temp.displayHeight = this.cameras.main.height
     temp.depth = -1
     bird.anims.play('clap')
 
-    readyMsg = this.add.sprite(this.cameras.main.width/2,this.cameras.main.height/2 - base.height + 50,"ready");
+    readyMsg = this.add.sprite(this.cameras.main.width / 2, this.cameras.main.height / 2 - base.height + 50, "ready");
+    scoreSprite.push(this.add.sprite(this.cameras.main.width / 2, this.cameras.main.height / 4, "number0"));
+    scoreSprite.push(this.add.sprite(this.cameras.main.width / 2 + scoreSprite[0].width, this.cameras.main.height / 4, "number0"));
+    scoreSprite.push(this.add.sprite(this.cameras.main.width / 2 + scoreSprite[0].width * 2, this.cameras.main.height / 4, "number0"));
+    scoreSprite = scoreSprite.map(el => {
+        el.depth = 10;
+        el.setAlpha(0);
+        return el;
+    })
+
+
 
 }
 var spacePressed = false;
@@ -111,6 +136,7 @@ function update() {
     }
     if (isStart) {
         if (!startOnce) {
+            scoreSprite[0].setAlpha(1)
             readyMsg.setAlpha(0);
             console.log(readyMsg)
             startOnce = true;
@@ -122,7 +148,7 @@ function update() {
                 );
                 var tempBot = this.pipeBottom.create(
                     this.cameras.main.width + 50 + distanceBetweenPipes * i,
-                    tempTop.y+tempTop.height+distanceBetweenTopAndBottom,
+                    tempTop.y + tempTop.height + distanceBetweenTopAndBottom,
                     'pipe'
                 );
                 tempTop.body.allowGravity = false;
@@ -134,8 +160,8 @@ function update() {
                 tempBot.setImmovable(true)
                 tempBot.setVelocityX(velocityPipes)
                 // this.physics.add.collider(bird,temp);
-                this.physics.add.overlap(bird,tempBot,crash);
-                this.physics.add.overlap(bird,tempTop,crash);
+                this.physics.add.overlap(bird, tempBot, crash);
+                this.physics.add.overlap(bird, tempTop, crash);
             }
         }
 
@@ -152,10 +178,40 @@ function update() {
 
             tempBot.body.allowGravity = false;
             tempBot.setVelocityX(velocityPipes)
+
+            cetakScore = false;
         }
+        this.pipeTop.children.entries.forEach(element => {
+            if (bird.x >= element.x) {
+                if (!cetakScore) {
+                    console.log("add scores!");
+                    scores++;
+                    console.log(scores.toString().split(''))
+                    var arrScore = scores.toString().split('');
+                    scoreSprite = scoreSprite.map(el => {
+                        el.setAlpha(0);
+                        return el;
+                    })
+                    var originPos = {
+                        x: this.cameras.main.width / 2,
+                        y: this.cameras.main.height / 4
+                    }
+                    var tw = scoreSprite[0].width * arrScore.length;
+                    var startpos = originPos.x - tw / 2 + scoreSprite[0].width / 2;
+                    console.log(scoreSprite)
+                    arrScore.forEach((arr, i) => {
+                        scoreSprite[i].setAlpha(1)
+                        scoreSprite[i].setTexture(`number${arr}`);
+                        scoreSprite[i].setPosition(startpos, scoreSprite[i].y);
+                        startpos += scoreSprite[0].width;
+                    })
+                    cetakScore = true;
+                }
+            }
+        });
     }
 }
 
-function crash(){
+function crash() {
     console.log("game over!")
 }
