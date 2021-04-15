@@ -49,6 +49,10 @@ function preload() {
 }
 var baseTexture;
 var bird;
+const birdPosition = {
+    x: undefined,
+    y: undefined
+}
 var base;
 var pipes;
 var isStart = false;
@@ -62,11 +66,13 @@ var readyMsg;
 var cetakScore = false;
 var scoreSprite = []
 function create() {
+    birdPosition.x = this.cameras.main.width / 4;
+    birdPosition.y = this.cameras.main.height / 2;
     const ref = this;
     // menambah sprite pada canvas dengan physics
     base = this.physics.add.sprite(null, null, 'base');
     base.depth = 5
-    bird = this.physics.add.sprite(this.cameras.main.width / 4, this.cameras.main.height / 2, 'flyer');
+    bird = this.physics.add.sprite(birdPosition.x, birdPosition.y, 'flyer');
     this.anims.create({
         key: 'clap',
         frames: this.anims.generateFrameNumbers('flyer', { start: 0, end: 2 }),
@@ -77,14 +83,6 @@ function create() {
     this.pipeBottom = this.physics.add.group();
 
 
-    // this.pipes.children.iterate(function (child) {
-    //     child.body.allowGravity = false
-    //     child.setImmovable(true)
-    //     child.setVelocityX(-50)
-    //     return child
-    //     //child.setBounceY(Phaser.Math.FloatBetween(0.4, 0.8));
-
-    // });
 
     bird.body.width = bird.width / 1.5
     bird.body.offset.x = (bird.width - bird.body.width) / 2
@@ -117,10 +115,12 @@ function create() {
 
 
 }
+var isCrash = false;
 var spacePressed = false;
+var stillPlay = true;
 function update() {
     // nothing required here
-    if (cursors.space.isDown && !spacePressed) {
+    if (cursors.space.isDown && !spacePressed && stillPlay) {
         // this.pipes.clear(true)
         console.log(this.pipes)
         spacePressed = true
@@ -130,7 +130,7 @@ function update() {
 
     }
 
-    if (spacePressed && cursors.space.isUp) {
+    if (spacePressed && cursors.space.isUp && stillPlay) {
         spacePressed = false
 
     }
@@ -160,8 +160,8 @@ function update() {
                 tempBot.setImmovable(true)
                 tempBot.setVelocityX(velocityPipes)
                 // this.physics.add.collider(bird,temp);
-                this.physics.add.overlap(bird, tempBot, crash);
-                this.physics.add.overlap(bird, tempTop, crash);
+                this.physics.add.overlap(bird, tempBot, crash.bind(this));
+                this.physics.add.overlap(bird, tempTop, crash.bind(this));
             }
         }
 
@@ -212,6 +212,28 @@ function update() {
     }
 }
 
-function crash() {
-    console.log("game over!")
+function crash(bird, pipe) {
+    stillPlay = false;
+    bird.setGravityY(800);
+    stopPipes(this.pipeTop, this.pipeBottom)
+    // isCrash = true;
+    // bird.body.allowGravity = false;
+    // bird.setPosition(birdPosition.x,birdPosition.y);
+    // scores=0;
+    // isStart = false;
+    // startOnce = false;
+    // console.log(this.pipeTop)
+    // this.pipeTop.destroy();
+    // this.pipeBottom.destroy();
+}
+
+function stopPipes(pipeTop, pipeBottom) {
+    pipeTop.children.iterate(child => {
+        child.setVelocityX(0)
+        return child;
+    })   
+    pipeBottom.children.iterate(child => {
+        child.setVelocityX(0)
+        return child;
+    })
 }
