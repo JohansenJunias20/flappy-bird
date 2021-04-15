@@ -45,6 +45,7 @@ function preload() {
     this.load.image('number7', 'assets/7.png')
     this.load.image('number8', 'assets/8.png')
     this.load.image('number9', 'assets/9.png')
+    this.load.image('gameover', 'assets/gameover.png')
 
 }
 var baseTexture;
@@ -112,7 +113,8 @@ function create() {
         return el;
     })
 
-
+    this.gameover = this.add.sprite(this.cameras.main.width/2,this.cameras.main.height/4,'gameover');
+    this.gameover.setAlpha(0);
 
 }
 var isCrash = false;
@@ -216,6 +218,10 @@ function crash(bird, pipe) {
     stillPlay = false;
     bird.setGravityY(800);
     stopPipes(this.pipeTop, this.pipeBottom)
+    this.gameover.setAlpha(1);
+    scoreSprite.forEach(child=>{
+        child.setAlpha(0)
+    })
     // isCrash = true;
     // bird.body.allowGravity = false;
     // bird.setPosition(birdPosition.x,birdPosition.y);
