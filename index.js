@@ -98,6 +98,7 @@ function create() {
 
     this.physics.add.collider(bird, base)
     cursors = this.input.keyboard.createCursorKeys();
+    mouse = this.input.activePointer;
     var temp = this.add.sprite(this.cameras.main.width / 2, this.cameras.main.height / 2, 'bg');
     console.log(this)
     temp.displayWidth = this.cameras.main.width
@@ -135,9 +136,22 @@ function create() {
     this.scoreboard.depth = 30;
 
 }
+var mouse;
 var isCrash = false;
 var spacePressed = false;
 var stillPlay = true;
+
+function destroyPipes(ref){
+    console.log("destroying pipes");
+    console.log(game.pipeTop)
+    ref.pipeTop.clear();
+    ref.pipeBottom.clear();
+}
+
+function generatePipes(){
+    
+}
+
 function update() {
     // nothing required here
     if (cursors.space.isDown && !spacePressed && stillPlay) {
@@ -154,11 +168,35 @@ function update() {
         spacePressed = false
 
     }
+    if(!stillPlay){
+        if(mouse.leftButtonDown()){
+            isStart = true;
+            destroyPipes(this);
+            stillPlay = true;
+            bird.setPosition(birdPosition.x,birdPosition.y);
+            bird.anims.play('clap');
+            bird.allowGravity = false;
+            this.scoreboard.setAlpha(0);
+            var arrScore = scores.toString().split('');
+            scoreSprite = scoreSprite.map(el => {
+                el.setAlpha(0);
+                return el;
+            })
+            const ref = this;   
+            arrScore.forEach((arr, i) => {
+                scoreSprite[i].setAlpha(1)
+                scoreSprite[i].depth = 51
+                scoreSprite[i].setTexture(`number${arr}`);
+                scoreSprite[i].setPosition(ref.cameras.main.width / 3.2, this.cameras.main.height / 2);
+            })
+        }
+    }
     if (isStart) {
         if (!startOnce) {
             scoreSprite[0].setAlpha(1)
             readyMsg.setAlpha(0);
-            console.log(readyMsg)
+            console.log("pipes:")
+            console.log(this.pipeTop)
             startOnce = true;
             for (let i = 0; i < 4; i++) {
                 var tempTop = this.pipeTop.create(
@@ -182,6 +220,7 @@ function update() {
                 // this.physics.add.collider(bird,temp);
                 this.physics.add.overlap(bird, tempBot, crash.bind(this));
                 this.physics.add.overlap(bird, tempTop, crash.bind(this));
+
             }
         }
 
@@ -198,7 +237,8 @@ function update() {
 
             tempBot.body.allowGravity = false;
             tempBot.setVelocityX(velocityPipes)
-
+            this.physics.add.overlap(bird, tempBot, crash.bind(this));
+            this.physics.add.overlap(bird, tempTop, crash.bind(this));
             cetakScore = false;
         }
         this.pipeTop.children.entries.forEach(element => {
@@ -253,11 +293,10 @@ function crash(bird, pipe) {
         })
         const ref = this;
         arrScore.forEach((arr, i) => {
-            console.log("arrscore")
             bestSprite[i].setAlpha(1)
             bestSprite[i].depth = 51
             bestSprite[i].setTexture(`number${arr}`);
-            bestSprite[i].setPosition(ref.cameras.main.width*0.7, ref.cameras.main.height / 2);
+            bestSprite[i].setPosition(ref.cameras.main.width * 0.7, ref.cameras.main.height / 2);
         })
 
     }
@@ -273,6 +312,7 @@ function crash(bird, pipe) {
         scoreSprite[i].setTexture(`number${arr}`);
         scoreSprite[i].setPosition(ref.cameras.main.width / 3.2, this.cameras.main.height / 2);
     })
+    startOnce = false;
     // isCrash = true;
     // bird.body.allowGravity = false;
     // bird.setPosition(birdPosition.x,birdPosition.y);
