@@ -46,6 +46,7 @@ function preload() {
     this.load.image('number8', 'assets/8.png')
     this.load.image('number9', 'assets/9.png')
     this.load.image('gameover', 'assets/gameover.png')
+    this.load.image('scoreboard', 'assets/score_board.png')
 
 }
 var baseTexture;
@@ -66,6 +67,7 @@ var scores = 0;
 var readyMsg;
 var cetakScore = false;
 var scoreSprite = []
+var best = 0;
 function create() {
     birdPosition.x = this.cameras.main.width / 4;
     birdPosition.y = this.cameras.main.height / 2;
@@ -113,8 +115,24 @@ function create() {
         return el;
     })
 
-    this.gameover = this.add.sprite(this.cameras.main.width/2,this.cameras.main.height/4,'gameover');
+    bestSprite.push(this.add.sprite(this.cameras.main.width / 2, this.cameras.main.height / 4, "number0"));
+    bestSprite.push(this.add.sprite(this.cameras.main.width / 2 + bestSprite[0].width, this.cameras.main.height / 4, "number0"));
+    bestSprite.push(this.add.sprite(this.cameras.main.width / 2 + bestSprite[0].width * 2, this.cameras.main.height / 4, "number0"));
+    bestSprite = bestSprite.map(el => {
+        el.depth = 10;
+        el.setAlpha(0);
+        return el;
+    })
+
+    this.gameover = this.add.sprite(this.cameras.main.width / 2, this.cameras.main.height / 4, 'gameover');
     this.gameover.setAlpha(0);
+    this.gameover.depth = 30;
+    this.scoreboard = this.add.sprite(this.cameras.main.width / 2, this.cameras.main.height / 2, 'scoreboard');
+    // this.scoreboard.displayWidth = this.cameras.main.width/2 - 10;
+    // this.scoreboard.displayWidth = this.cameras.main.width/2 - 10;
+    this.scoreboard.setScale(0.4);
+    this.scoreboard.setAlpha(0);
+    this.scoreboard.depth = 30;
 
 }
 var isCrash = false;
@@ -204,7 +222,7 @@ function update() {
                     arrScore.forEach((arr, i) => {
                         scoreSprite[i].setAlpha(1)
                         scoreSprite[i].setTexture(`number${arr}`);
-                        scoreSprite[i].setPosition(startpos, scoreSprite[i].y);
+                        scoreSprite[i].setPosition(startpos, this.cameras.main.height / 4);
                         startpos += scoreSprite[0].width;
                     })
                     cetakScore = true;
@@ -214,13 +232,46 @@ function update() {
     }
 }
 
+var bestSprite = []
 function crash(bird, pipe) {
     stillPlay = false;
     bird.setGravityY(800);
     stopPipes(this.pipeTop, this.pipeBottom)
     this.gameover.setAlpha(1);
-    scoreSprite.forEach(child=>{
+    scoreSprite.forEach(child => {
         child.setAlpha(0)
+    })
+    bird.anims.stop();
+    this.scoreboard.setAlpha(1);
+    if (best <= scores) {
+        best = scores;
+        var arrScore = best.toString().split('');
+        bestSprite = bestSprite.map(el => {
+            el.setAlpha(0);
+
+            return el;
+        })
+        const ref = this;
+        arrScore.forEach((arr, i) => {
+            console.log("arrscore")
+            bestSprite[i].setAlpha(1)
+            bestSprite[i].depth = 51
+            bestSprite[i].setTexture(`number${arr}`);
+            bestSprite[i].setPosition(ref.cameras.main.width*0.7, ref.cameras.main.height / 2);
+        })
+
+    }
+    var arrScore = scores.toString().split('');
+    scoreSprite = scoreSprite.map(el => {
+        el.setAlpha(0);
+        return el;
+    })
+    const ref = this;
+    arrScore.forEach((arr, i) => {
+        scoreSprite[i].setAlpha(1)
+        scoreSprite[i].depth = 51
+        scoreSprite[i].setTexture(`number${arr}`);
+        scoreSprite[i].setPosition(ref.cameras.main.width / 3.2, this.cameras.main.height / 2);
     })
     // isCrash = true;
     // bird.body.allowGravity = false;
@@ -237,7 +288,7 @@ function stopPipes(pipeTop, pipeBottom) {
     pipeTop.children.iterate(child => {
         child.setVelocityX(0)
         return child;
-    })   
+    })
     pipeBottom.children.iterate(child => {
         child.setVelocityX(0)
         return child;
